@@ -1,0 +1,3 @@
+[submodule "subprojects/sdbus-cpp"]
+	path = subprojects/sdbus-cpp
+	url = https://github.com/Kistler-Group/sdbus-cpp/
