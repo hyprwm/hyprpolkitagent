@@ -5,7 +5,8 @@
 #include <QSocketNotifier>
 
 class CSigDaemon : public QObject {
-  Q_OBJECT;
+    Q_OBJECT;
+
   public:
     CSigDaemon(QObject* parent = nullptr);
 

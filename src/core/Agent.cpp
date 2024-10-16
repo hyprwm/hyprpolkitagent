@@ -37,8 +37,14 @@ bool CAgent::start() {
 void CAgent::resetAuthState() {
     if (authState.authing) {
         authState.authing = false;
-        authState.qmlEngine.reset();
-        authState.qmlIntegration.reset();
+
+        if (authState.qmlEngine)
+            authState.qmlEngine->deleteLater();
+        if (authState.qmlIntegration)
+            authState.qmlIntegration->deleteLater();
+
+        authState.qmlEngine      = nullptr;
+        authState.qmlIntegration = nullptr;
     }
 }
 
@@ -52,16 +58,15 @@ void CAgent::initAuthPrompt() {
 
     std::print("Spawning qml prompt\n");
 
-    authState.qmlEngine.reset();
     authState.authing = true;
 
-    authState.qmlIntegration = makeShared<CQMLIntegration>();
+    authState.qmlIntegration = new CQMLIntegration();
 
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE"))
         QQuickStyle::setStyle("org.kde.desktop");
 
-    authState.qmlEngine = makeShared<QQmlApplicationEngine>();
-    authState.qmlEngine->rootContext()->setContextProperty("hpa", authState.qmlIntegration.get());
+    authState.qmlEngine = new QQmlApplicationEngine();
+    authState.qmlEngine->rootContext()->setContextProperty("hpa", authState.qmlIntegration);
     authState.qmlEngine->load(QUrl{u"qrc:/qt/qml/hpa/qml/main.qml"_qs});
 
     authState.qmlIntegration->focusField();

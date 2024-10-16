@@ -14,7 +14,7 @@ CPolkitListener::CPolkitListener(QObject* parent) : Listener(parent) {
 }
 
 void CPolkitListener::initiateAuthentication(const QString& actionId, const QString& message, const QString& iconName, const PolkitQt1::Details& details, const QString& cookie,
-                                       const PolkitQt1::Identity::List& identities, AsyncResult* result) {
+                                             const PolkitQt1::Identity::List& identities, AsyncResult* result) {
 
     std::print("> New authentication session\n");
 

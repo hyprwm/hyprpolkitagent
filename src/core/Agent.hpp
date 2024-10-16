@@ -30,9 +30,9 @@ class CAgent {
 
   private:
     struct {
-        bool                      authing = false;
-        SP<QQmlApplicationEngine> qmlEngine;
-        SP<CQMLIntegration>       qmlIntegration;
+        bool                   authing        = false;
+        QQmlApplicationEngine* qmlEngine      = nullptr;
+        CQMLIntegration*       qmlIntegration = nullptr;
     } authState;
 
     struct {
