@@ -5,8 +5,8 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
 
-    property var windowWidth: 550
-    property var windowHeight: 240
+    property var windowWidth: Math.round(fontMetrics.height * 39.2856)
+    property var windowHeight: Math.round(fontMetrics.height * 17.1428)
 
     maximumWidth: windowWidth
     maximumHeight: windowHeight
