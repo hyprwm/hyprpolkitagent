@@ -40,7 +40,7 @@ ApplicationWindow {
             anchors.fill: parent
             anchors.margins: 4
 
-            Text {
+            Label {
                 color: Qt.darker(system.windowText, 0.8)
                 font.bold: true
                 font.pointSize: Math.round(fontMetrics.height * 1.05)
@@ -53,8 +53,7 @@ ApplicationWindow {
                 Layout.bottomMargin: fontMetrics.height / 2
             }
 
-            Text {
-                color: system.windowText
+            Label {
                 text: hpa.getMessage()
             }
 
@@ -85,7 +84,7 @@ ApplicationWindow {
 
             }
 
-            Text {
+            Label {
                 id: errorLabel
 
                 color: "red"
