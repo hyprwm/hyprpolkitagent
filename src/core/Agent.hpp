@@ -15,7 +15,6 @@ using namespace Hyprutils::Memory;
 #define WP CWeakPointer
 
 class CQMLIntegration;
-class CSigDaemon;
 
 class CAgent {
   public:
@@ -40,7 +39,6 @@ class CAgent {
     } lastAuthResult;
 
     CPolkitListener                   listener;
-    SP<CSigDaemon>                    sigDaemon;
     SP<PolkitQt1::UnixSessionSubject> sessionSubject;
 
     bool                              resultReady();

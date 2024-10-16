@@ -5,7 +5,6 @@
 
 #include "Agent.hpp"
 #include "../QMLIntegration.hpp"
-#include "../SigDaemon.hpp"
 
 CAgent::CAgent() {
     ;
@@ -23,8 +22,6 @@ bool CAgent::start() {
     int          argc = 1;
     char*        argv = (char*)"hyprpolkitagent";
     QApplication app(argc, &argv);
-
-    sigDaemon = makeShared<CSigDaemon>();
 
     app.setApplicationName("Hyprland Polkit Agent");
     QGuiApplication::setQuitOnLastWindowClosed(false);

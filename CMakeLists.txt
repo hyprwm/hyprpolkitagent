@@ -30,8 +30,6 @@ qt_add_executable(hyprpolkitagent
     src/core/PolkitListener.cpp
     src/QMLIntegration.cpp
     src/QMLIntegration.hpp
-    src/SigDaemon.hpp
-    src/SigDaemon.cpp
 )
 
 qt_add_qml_module(hyprpolkitagent
@@ -42,8 +40,6 @@ qt_add_qml_module(hyprpolkitagent
     SOURCES
         src/QMLIntegration.cpp
         src/QMLIntegration.hpp
-        src/SigDaemon.hpp
-        src/SigDaemon.cpp
 )
 
 target_link_libraries(hyprpolkitagent
