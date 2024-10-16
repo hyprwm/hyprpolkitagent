@@ -1,2 +1,4 @@
 # hyprpolkitagent
-A polkit authentication agent written in QT/QML
+A simple polkit authentication agent for Hyprland, written in QT/QML.
+
+![](./assets/screenshot.png)
