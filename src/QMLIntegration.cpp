@@ -27,3 +27,7 @@ void CQMLIntegration::setError(QString str) {
 void CQMLIntegration::focus() {
     emit focusField();
 }
+
+void CQMLIntegration::setInputBlocked(bool blocked) {
+    emit blockInput(blocked);
+}

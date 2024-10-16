@@ -26,7 +26,6 @@ class CAgent {
     void resetAuthState();
     bool start();
     void initAuthPrompt();
-    void setAuthError(const QString& err);
 
   private:
     struct {
@@ -36,7 +35,6 @@ class CAgent {
     } authState;
 
     struct {
-        std::mutex  resultMutex;
         std::string result;
         bool        used = true;
     } lastAuthResult;
@@ -48,6 +46,7 @@ class CAgent {
     bool                              resultReady();
 
     friend class CQMLIntegration;
+    friend class CPolkitListener;
 };
 
 inline std::unique_ptr<CAgent> g_pAgent;

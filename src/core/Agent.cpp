@@ -73,13 +73,10 @@ void CAgent::initAuthPrompt() {
 }
 
 bool CAgent::resultReady() {
-    std::lock_guard<std::mutex> lg(lastAuthResult.resultMutex);
-
     return !lastAuthResult.used;
 }
 
 void CAgent::submitResultThreadSafe(const std::string& result) {
-    std::lock_guard<std::mutex> lg(lastAuthResult.resultMutex);
     lastAuthResult.used   = false;
     lastAuthResult.result = result;
 
@@ -91,11 +88,4 @@ void CAgent::submitResultThreadSafe(const std::string& result) {
         listener.submitPassword(result.substr(result.find(":") + 1).c_str());
     else
         listener.cancelPending();
-}
-
-void CAgent::setAuthError(const QString& err) {
-    if (!authState.qmlIntegration)
-        return;
-
-    authState.qmlIntegration->setErrorString(err);
 }

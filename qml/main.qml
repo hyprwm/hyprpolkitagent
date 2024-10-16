@@ -13,6 +13,9 @@ ApplicationWindow {
     minimumWidth: windowWidth
     minimumHeight: windowHeight
     visible: true
+    onClosing: {
+        hpa.setResult("fail");
+    }
 
     FontMetrics {
         id: fontMetrics
@@ -70,6 +73,13 @@ ApplicationWindow {
                     target: hpa
                     onFocusField: () => {
                         passwordField.focus = true;
+                    }
+                    onBlockInput: (block) => {
+                        passwordField.readOnly = block;
+                        if (!block) {
+                            passwordField.focus = true;
+                            passwordField.selectAll();
+                        }
                     }
                 }
 

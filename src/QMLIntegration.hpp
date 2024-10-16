@@ -19,6 +19,7 @@ class CQMLIntegration : public QObject {
 
     void                setError(QString str);
     void                focus();
+    void                setInputBlocked(bool blocked);
 
     QString             result = "fail", errorText = "";
 
@@ -33,4 +34,5 @@ class CQMLIntegration : public QObject {
   signals:
     void setErrorString(QString err);
     void focusField();
+    void blockInput(bool block);
 };
