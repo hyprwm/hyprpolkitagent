@@ -51,8 +51,5 @@ target_link_libraries(hyprpolkitagent
 )
 
 include(GNUInstallDirs)
-install(TARGETS hyprpolkitagent
-    BUNDLE DESTINATION .
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-)
+
+install(TARGETS hyprpolkitagent DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
