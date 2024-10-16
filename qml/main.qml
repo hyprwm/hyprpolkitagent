@@ -5,8 +5,8 @@ import QtQuick.Layouts
 ApplicationWindow {
     id: window
 
-    property var windowWidth: Math.round(fontMetrics.height * 39.2856)
-    property var windowHeight: Math.round(fontMetrics.height * 17.1428)
+    property var windowWidth: Math.round(fontMetrics.height * 32.2856)
+    property var windowHeight: Math.round(fontMetrics.height * 13.9528)
 
     maximumWidth: windowWidth
     maximumHeight: windowHeight
@@ -90,7 +90,7 @@ ApplicationWindow {
 
                 color: "red"
                 font.italic: true
-                Layout.topMargin: fontMetrics.height
+                Layout.topMargin: 0
                 text: ""
                 Layout.alignment: Qt.AlignHCenter
 
