@@ -54,6 +54,7 @@ ApplicationWindow {
             }
 
             Label {
+                color: system.windowText
                 text: hpa.getMessage()
             }
 
