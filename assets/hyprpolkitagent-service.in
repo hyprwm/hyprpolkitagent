@@ -9,3 +9,6 @@ ExecStart=@LIBEXECDIR@/hyprpolkitagent
 Slice=session.slice
 TimeoutStopSec=5sec
 Restart=on-failure
+
+[Install]
+WantedBy=graphical-session.target
