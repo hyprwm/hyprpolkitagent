@@ -7,11 +7,12 @@ ApplicationWindow {
 
     property var windowWidth: Math.round(fontMetrics.height * 32.2856)
     property var windowHeight: Math.round(fontMetrics.height * 13.9528)
+    property var heightSafeMargin: 15
 
-    maximumWidth: windowWidth
-    maximumHeight: windowHeight
-    minimumWidth: windowWidth
-    minimumHeight: windowHeight
+    minimumWidth: Math.max(windowWidth, mainLayout.Layout.minimumWidth) + mainLayout.anchors.margins * 2
+    minimumHeight: Math.max(windowHeight, mainLayout.Layout.minimumHeight) + mainLayout.anchors.margins * 2 + heightSafeMargin
+    maximumWidth: minimumWidth
+    maximumHeight: minimumHeight
     visible: true
     onClosing: {
         hpa.setResult("fail");
@@ -28,6 +29,8 @@ ApplicationWindow {
     }
 
     Item {
+        id: mainLayout
+
         anchors.fill: parent
         Keys.onEscapePressed: (e) => {
             hpa.setResult("fail");
@@ -46,6 +49,9 @@ ApplicationWindow {
                 font.pointSize: Math.round(fontMetrics.height * 1.05)
                 text: "Authenticating for " + hpa.getUser()
                 Layout.alignment: Qt.AlignHCenter
+                Layout.maximumWidth: parent.width
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
 
             HSeparator {
@@ -56,6 +62,9 @@ ApplicationWindow {
             Label {
                 color: system.windowText
                 text: hpa.getMessage()
+                Layout.maximumWidth: parent.width
+                elide: Text.ElideRight
+                wrapMode: Text.WordWrap
             }
 
             TextField {
