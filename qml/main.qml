@@ -80,10 +80,10 @@ ApplicationWindow {
 
                 Connections {
                     target: hpa
-                    onFocusField: () => {
+                    function onFocusField() {
                         passwordField.focus = true;
                     }
-                    onBlockInput: (block) => {
+                    function onBlockInput(block) {
                         passwordField.readOnly = block;
                         if (!block) {
                             passwordField.focus = true;
@@ -105,7 +105,7 @@ ApplicationWindow {
 
                 Connections {
                     target: hpa
-                    onSetErrorString: (e) => {
+                    function onSetErrorString(e) {
                         errorLabel.text = e;
                     }
                 }
