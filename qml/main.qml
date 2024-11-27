@@ -38,6 +38,9 @@ ApplicationWindow {
         Keys.onReturnPressed: (e) => {
             hpa.setResult("auth:" + passwordField.text);
         }
+        Keys.onEnterPressed: (e) => {
+            hpa.setResult("auth:" + passwordField.text);
+        }
 
         ColumnLayout {
             anchors.fill: parent
