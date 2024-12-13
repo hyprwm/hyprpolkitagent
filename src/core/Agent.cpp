@@ -2,6 +2,8 @@
 
 #include <polkitagent/polkitagent.h>
 #include <print>
+#include <QtCore/QString>
+using namespace Qt::Literals::StringLiterals;
 
 #include "Agent.hpp"
 #include "../QMLIntegration.hpp"
@@ -64,7 +66,7 @@ void CAgent::initAuthPrompt() {
 
     authState.qmlEngine = new QQmlApplicationEngine();
     authState.qmlEngine->rootContext()->setContextProperty("hpa", authState.qmlIntegration);
-    authState.qmlEngine->load(QUrl{u"qrc:/qt/qml/hpa/qml/main.qml"_qs});
+    authState.qmlEngine->load(QUrl{u"qrc:/qt/qml/hpa/qml/main.qml"_s});
 
     authState.qmlIntegration->focusField();
 }
