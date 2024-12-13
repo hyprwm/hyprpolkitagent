@@ -53,6 +53,4 @@ configure_file(assets/hyprpolkitagent-service.in hyprpolkitagent.service @ONLY)
 
 install(TARGETS hyprpolkitagent DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
 install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent.service
-        DESTINATION "${CMAKE_INSTALL_DATAROOTDIR}/dbus-1/services")
-install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent.service
         DESTINATION "lib/systemd/user")
