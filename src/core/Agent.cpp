@@ -61,7 +61,7 @@ void CAgent::initAuthPrompt() {
 
     authState.qmlIntegration = new CQMLIntegration();
 
-    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE"))
+    if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE") && !qEnvironmentVariableIsEmpty("KDE_FULL_SESSION"))
         QQuickStyle::setStyle("org.kde.desktop");
 
     authState.qmlEngine = new QQmlApplicationEngine();
