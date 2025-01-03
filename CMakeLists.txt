@@ -50,7 +50,12 @@ include(GNUInstallDirs)
 
 set(LIBEXECDIR ${CMAKE_INSTALL_FULL_LIBEXECDIR})
 configure_file(assets/hyprpolkitagent-service.in hyprpolkitagent.service @ONLY)
+configure_file(assets/hyprpolkitagent-dbus.in hyprpolkitagent-dbus.service @ONLY)
 
-install(TARGETS hyprpolkitagent DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
+install(TARGETS hyprpolkitagent 
+        DESTINATION ${CMAKE_INSTALL_LIBEXECDIR})
 install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent.service
         DESTINATION "lib/systemd/user")
+install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent-dbus.service
+        DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services
+        RENAME hyprpolkitagent.service)
