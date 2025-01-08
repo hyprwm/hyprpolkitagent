@@ -62,7 +62,7 @@ void CAgent::initAuthPrompt() {
     authState.qmlIntegration = new CQMLIntegration();
 
     if (qEnvironmentVariableIsEmpty("QT_QUICK_CONTROLS_STYLE"))
-        QQuickStyle::setStyle("org.kde.desktop");
+        QQuickStyle::setStyle("org.hyprland.style");
 
     authState.qmlEngine = new QQmlApplicationEngine();
     authState.qmlEngine->rootContext()->setContextProperty("hpa", authState.qmlIntegration);
