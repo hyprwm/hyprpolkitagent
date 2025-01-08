@@ -15,6 +15,7 @@ in {
 
   hyprpolkitagent = lib.composeManyExtensions [
     inputs.hyprutils.overlays.default
+    inputs.hyprland-qt-support.overlays.default
     (final: prev: {
       hyprpolkitagent = final.callPackage ./. {
         stdenv = final.gcc14Stdenv;
