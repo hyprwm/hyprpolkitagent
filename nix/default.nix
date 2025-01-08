@@ -4,6 +4,7 @@
   cmake,
   pkg-config,
   hyprutils,
+  hyprland-qt-support,
   kdePackages,
   polkit,
   qt6,
@@ -32,9 +33,9 @@ in
 
     buildInputs = [
       hyprutils
-      kdePackages.kirigami-addons
-      kdePackages.polkit-qt-1
+      hyprland-qt-support
       polkit
+      kdePackages.polkit-qt-1
       qt6.qtbase
       qt6.qtsvg
       qt6.qtwayland
