@@ -18,7 +18,7 @@ in {
     inputs.hyprland-qt-support.overlays.default
     (final: prev: {
       hyprpolkitagent = final.callPackage ./. {
-        stdenv = final.gcc14Stdenv;
+        stdenv = final.gcc15Stdenv;
         version = "${version}+date=${date}_${self.shortRev or "dirty"}";
       };
     })
