@@ -58,4 +58,4 @@ install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent.service
         DESTINATION "lib/systemd/user")
 install(FILES ${CMAKE_BINARY_DIR}/hyprpolkitagent-dbus.service
         DESTINATION ${CMAKE_INSTALL_DATADIR}/dbus-1/services
-        RENAME hyprpolkitagent.service)
+        RENAME org.hyprland.hyprpolkitagent.service)
