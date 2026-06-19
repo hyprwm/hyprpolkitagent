@@ -96,8 +96,10 @@ void CDialog::buildPasswordField() {
                                   m_authEnabled = nowEnabled;
                                   m_authButton->setEnabled(nowEnabled);
                               }
-                              if (!s.empty() && m_errShown)
-                                  setError("");
+                              // keep the previous error visible until a new one arrives or the
+                              // dialog closes. clearing on first keystroke produced a red flash
+                              // because the helper restart resets the field, fires onTextEdited
+                              // with an empty string, then again with the first typed char.
                           })
                           ->commence();
 }

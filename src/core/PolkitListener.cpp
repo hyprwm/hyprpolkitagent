@@ -475,7 +475,10 @@ void CPolkitListener::onHelperReadable() {
             startHelper(*cur);
             return;
         }
-        completeAuth(false, false);
+        // helper exited without ever prompting AND fork fallback was already tried.
+        // unrecoverable PAM state (locked account, broken stack). complete as cancelled
+        // so polkitd does not re-dispatch BeginAuthentication and reopen forever.
+        completeAuth(false, !hadPrompt && cur->helper.triedFork);
     }
 }
 
@@ -530,7 +533,10 @@ void CPolkitListener::handleLine(SActiveAuth& a, const std::string& line) {
                 startHelper(a);
                 return;
             }
-            completeAuth(false, false);
+            // helper rejected the conversation outright (account locked, broken PAM
+            // stack, etc.). complete as cancelled so polkitd does not re-dispatch
+            // BeginAuthentication and reopen an empty dialog forever.
+            completeAuth(false, true);
             return;
         }
         startHelper(a);
