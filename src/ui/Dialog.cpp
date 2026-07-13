@@ -178,6 +178,10 @@ void CDialog::build() {
                    ->maxSize({600.0, targetHeight})
                    ->appTitle("Authentication Required")
                    ->appClass("hyprpolkitagent")
+                   // inhibit compositor keybinds while the prompt is focused so a focus-cycle
+                   // bind can't move keyboard off the dialog mid-password. no-ops where the
+                   // compositor doesn't advertise the manager.
+                   ->inhibitShortcuts(true)
                    ->commence();
 
     m_closeListener = m_window->m_events.closeRequest.listen([] { g_pAgent->cancel(); });
