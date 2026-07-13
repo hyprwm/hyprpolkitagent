@@ -55,6 +55,11 @@ void CDialog::setPrompt(const std::string& text, bool echo) {
     if (newPrompt.empty())
         newPrompt = "Password";
 
+    // a real password prompt: pam wants typed input now, so reveal the field and button
+    // if a preceding cue had hidden them. no-op when already visible (password-only auth).
+    m_sawPasswordPrompt = true;
+    showPasswordField(true);
+
     // initial prompt arrives after build() and would clobber the first keystroke
     const bool clean = m_currentPassword.empty() && newPrompt == m_promptText && echo == m_promptEcho;
 
@@ -116,7 +121,28 @@ void CDialog::showStatus(CSharedPointer<IElement>& wrap, bool& shown, bool show)
     }
 }
 
+void CDialog::showPasswordField(bool show) {
+    if (show == m_passwordVisible || !m_passwordWrap)
+        return;
+    m_passwordVisible = show;
+    if (show) {
+        m_passwordWrap->addChild(m_passwordField);
+        if (m_btnRow && m_authButton)
+            m_btnRow->addChild(m_authButton);
+        m_passwordField->focus();
+    } else {
+        m_passwordWrap->removeChild(m_passwordField);
+        if (m_btnRow && m_authButton)
+            m_btnRow->removeChild(m_authButton);
+    }
+}
+
 void CDialog::setInfo(const std::string& text) {
+    // a pam cue (fingerprint reader, security key) that arrives before any password
+    // prompt means pam is not asking for a password yet. hide the field until it does,
+    // and reveal it only if pam falls back to a password prompt. matches polkit-gnome.
+    if (!text.empty() && !m_sawPasswordPrompt)
+        showPasswordField(false);
     if (m_infoLabel)
         m_infoLabel->setText(std::string{text});
     showStatus(m_infoWrap, m_infoShown, !text.empty());
@@ -295,6 +321,9 @@ void CDialog::build() {
         buildPasswordField();
         wrap->addChild(m_passwordField);
         outer->addChild(wrap);
+        // kept as a member so the field can be pulled out and put back while a
+        // fingerprint or security key is pending (see showPasswordField).
+        m_passwordWrap = wrap;
     }
 
     // wraps are only attached when their label has text, so empty labels reserve no space
@@ -341,6 +370,7 @@ void CDialog::build() {
                            ->commence();
         btnRow->addChild(m_authButton);
         outer->addChild(btnRow);
+        m_btnRow = btnRow;
     }
 
     std::vector<std::pair<std::string, std::string>> fields;
