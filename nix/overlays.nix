@@ -28,7 +28,7 @@ in
 
   hyprpolkitagent = final: prev: {
     hyprpolkitagent = final.callPackage ./. {
-      stdenv = final.gcc15Stdenv;
+      stdenv = final.gcc16Stdenv;
       version = "${version}+date=${date}_${self.shortRev or "dirty"}";
     };
   };
