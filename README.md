@@ -5,7 +5,7 @@ A simple polkit authentication agent for Hyprland, written in C++ with [hyprtool
 
 ## Usage
 
-See [the hyprland wiki](https://wiki.hyprland.org/Hypr-Ecosystem/hyprpolkitagent/).
+See [the hyprland wiki](https://wiki.hypr.land/Hypr-Ecosystem/hyprpolkitagent/).
 
 ## Configuration
 
