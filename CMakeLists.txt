@@ -16,6 +16,7 @@ pkg_check_modules(deps REQUIRED IMPORTED_TARGET
     hyprgraphics
     hyprlang
     pixman-1
+    pango
     libdrm
     sdbus-c++>=2
 )
