@@ -79,11 +79,17 @@ void CDialog::setPrompt(const std::string& text, bool echo) {
     m_passwordField->rebuild()->placeholder(std::string{newPrompt})->commence();
     m_passwordField->setText(std::string{});
     m_passwordField->setPassword(!echo);
-    if (m_authEnabled && m_authButton) {
-        m_authEnabled = false;
-        m_authButton->setEnabled(false);
+    if (m_authEnabled != canSubmit() && m_authButton) {
+        m_authEnabled = canSubmit();
+        m_authButton->setEnabled(m_authEnabled);
     }
     m_passwordField->focus();
+}
+
+bool CDialog::canSubmit() const {
+    // an empty response makes pam_unix fail and lets pam move on to the next module
+    // (e.g. face recognition). never while the field is hidden: pam is not asking then.
+    return m_passwordVisible && (g_pConfigManager->get().allowEmptyPassword || !m_currentPassword.empty());
 }
 
 void CDialog::buildPasswordField() {
@@ -96,7 +102,7 @@ void CDialog::buildPasswordField() {
                           ->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_ABSOLUTE, {(double)cfg.passwordFieldWidth, 36.0}})
                           ->onTextEdited([this](CSharedPointer<CTextboxElement>, const std::string& s) {
                               m_currentPassword     = s;
-                              const bool nowEnabled = !s.empty();
+                              const bool nowEnabled = canSubmit();
                               if (nowEnabled != m_authEnabled && m_authButton) {
                                   m_authEnabled = nowEnabled;
                                   m_authButton->setEnabled(nowEnabled);
@@ -180,6 +186,8 @@ void CDialog::build() {
                    ->appClass("hyprpolkitagent")
                    ->commence();
 
+    m_authEnabled = canSubmit();
+
     m_closeListener = m_window->m_events.closeRequest.listen([] { g_pAgent->cancel(); });
 
     m_keyListener = m_window->m_events.keyboardKey.listen([this](const Input::SKeyboardKeyEvent& ev) {
@@ -194,7 +202,7 @@ void CDialog::build() {
         if (!ev.down || ev.repeat)
             return;
         if (ev.xkbKeysym == XKB_KEY_Return || ev.xkbKeysym == XKB_KEY_KP_Enter) {
-            if (!m_currentPassword.empty())
+            if (canSubmit())
                 g_pAgent->submitPassword(m_currentPassword);
         } else if (ev.xkbKeysym == XKB_KEY_Escape) {
             g_pAgent->cancel();
@@ -362,9 +370,9 @@ void CDialog::build() {
 
         m_authButton = CButtonBuilder::begin()
                            ->label(std::string{"Authenticate"})
-                           ->enabled(false)
+                           ->enabled(m_authEnabled)
                            ->onMainClick([this](CSharedPointer<CButtonElement>) {
-                               if (!m_currentPassword.empty())
+                               if (canSubmit())
                                    g_pAgent->submitPassword(m_currentPassword);
                            })
                            ->commence();

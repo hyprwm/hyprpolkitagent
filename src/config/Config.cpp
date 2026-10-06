@@ -21,6 +21,7 @@ void CConfigManager::load() {
     cfg.addConfigValue("general:window_width", Hyprlang::INT{520});
     cfg.addConfigValue("general:window_height", Hyprlang::INT{440});
     cfg.addConfigValue("general:show_details", Hyprlang::INT{1});
+    cfg.addConfigValue("general:allow_empty_password", Hyprlang::INT{0});
 
     cfg.commence();
     const auto res = cfg.parse();
@@ -33,4 +34,5 @@ void CConfigManager::load() {
     m_cfg.windowWidth        = iv("general:window_width");
     m_cfg.windowHeight       = iv("general:window_height");
     m_cfg.showDetails        = iv("general:show_details") != 0;
+    m_cfg.allowEmptyPassword = iv("general:allow_empty_password") != 0;
 }
