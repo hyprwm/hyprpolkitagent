@@ -7,6 +7,7 @@
 #include <hyprtoolkit/element/RowLayout.hpp>
 #include <hyprtoolkit/element/ColumnLayout.hpp>
 #include <hyprtoolkit/element/Combobox.hpp>
+#include <hyprtoolkit/element/ScrollArea.hpp>
 #include <hyprtoolkit/types/SizeType.hpp>
 #include <hyprtoolkit/types/FontTypes.hpp>
 #include <hyprtoolkit/palette/Color.hpp>
@@ -155,22 +156,73 @@ void CDialog::setError(const std::string& text) {
 }
 
 void CDialog::build() {
-    const auto& cfg = g_pConfigManager->get();
+    const auto&                                      cfg = g_pConfigManager->get();
+
+    constexpr double                                 OUTER_GAP = 12.0;
+
+    std::vector<std::pair<std::string, std::string>> fields;
+    if (!m_req.actionId.empty())
+        fields.emplace_back("Action", m_req.actionId);
+    if (!m_req.vendor.empty())
+        fields.emplace_back("Vendor", m_req.vendor);
+    if (!m_req.vendorUrl.empty())
+        fields.emplace_back("URL", m_req.vendorUrl);
+    for (const auto& [k, v] : m_req.details)
+        fields.emplace_back(k, v);
 
     // the window is sized once for the details-expanded case and never resizes.
     // details start hidden; toggling them only fills space already reserved here.
-    size_t detailRows = 0;
-    if (cfg.showDetails) {
-        if (!m_req.actionId.empty())
-            ++detailRows;
-        if (!m_req.vendor.empty())
-            ++detailRows;
-        if (!m_req.vendorUrl.empty())
-            ++detailRows;
-        detailRows += m_req.details.size();
+    // so the details box is built and measured before the window exists.
+    double extraForDetails = 0.0;
+    if (cfg.showDetails && !fields.empty()) {
+        constexpr double DETAILS_MARGIN     = 12.0;
+        constexpr double MAX_DETAILS_HEIGHT = 200.0;
+
+        auto             detailsBoxWrap = CRowLayoutBuilder::begin()->commence();
+        detailsBoxWrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
+        detailsBoxWrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
+
+        auto detailsBox = CRectangleBuilder::begin()
+                              ->color([] { return g_pAgent->backend()->getPalette()->m_colors.alternateBase; })
+                              ->rounding(g_pAgent->backend()->getPalette()->m_vars.bigRounding)
+                              ->size(CDynamicSize{CDynamicSize::HT_SIZE_AUTO, CDynamicSize::HT_SIZE_AUTO, {}})
+                              ->commence();
+
+        auto detailsCol = CColumnLayoutBuilder::begin()->gap(4)->commence();
+        detailsCol->setMargin(DETAILS_MARGIN);
+
+        // rows get a fixed width so long values wrap and the box is never wider than the password field
+        for (const auto& [key, val] : fields) {
+            detailsCol->addChild(CTextBuilder::begin()
+                                     ->text(key + ": " + val)
+                                     ->fontSize({CFontSize::HT_FONT_SMALL})
+                                     ->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_AUTO, {(double)cfg.passwordFieldWidth - DETAILS_MARGIN * 2.0, 0.0}})
+                                     ->noEllipsize(true)
+                                     ->color([] { return g_pAgent->backend()->getPalette()->m_colors.text.darken(0.3); })
+                                     ->commence());
+        }
+
+        detailsBox->addChild(detailsCol);
+        detailsBoxWrap->addChild(detailsBox);
+        m_detailsContainer = detailsBoxWrap;
+
+        // not in a window yet, so this lays the box out at its natural size
+        detailsBox->forceReposition();
+        auto detailsSize = detailsBox->size();
+
+        // too tall to reserve space for: scroll the rows inside the box
+        if (detailsSize.y > MAX_DETAILS_HEIGHT) {
+            detailsSize.y = MAX_DETAILS_HEIGHT;
+            auto scroll =
+                CScrollAreaBuilder::begin()->scrollY(true)->showScrollbar(true)->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_ABSOLUTE, detailsSize})->commence();
+            detailsBox->removeChild(detailsCol);
+            scroll->addChild(detailsCol);
+            detailsBox->addChild(scroll);
+        }
+
+        extraForDetails = detailsSize.y + OUTER_GAP;
     }
-    const double extraForDetails = detailRows > 0 ? (double)detailRows * 8.0 : 0.0;
-    const double targetHeight    = (double)cfg.windowHeight + extraForDetails;
+    const double targetHeight = (double)cfg.windowHeight + extraForDetails;
 
     m_window = CWindowBuilder::begin()
                    ->preferredSize({(double)cfg.windowWidth, targetHeight})
@@ -203,7 +255,7 @@ void CDialog::build() {
 
     m_window->m_rootElement->addChild(CRectangleBuilder::begin()->color([] { return g_pAgent->backend()->getPalette()->m_colors.background; })->commence());
 
-    auto outer = CColumnLayoutBuilder::begin()->size({CDynamicSize::HT_SIZE_PERCENT, CDynamicSize::HT_SIZE_AUTO, {0.88F, 0.0F}})->gap(12)->commence();
+    auto outer = CColumnLayoutBuilder::begin()->size({CDynamicSize::HT_SIZE_PERCENT, CDynamicSize::HT_SIZE_AUTO, {0.88F, 0.0F}})->gap(OUTER_GAP)->commence();
     outer->setMargin(20);
     outer->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
     outer->setPositionFlag(IElement::HT_POSITION_FLAG_CENTER, true);
@@ -373,17 +425,7 @@ void CDialog::build() {
         m_btnRow = btnRow;
     }
 
-    std::vector<std::pair<std::string, std::string>> fields;
-    if (!m_req.actionId.empty())
-        fields.emplace_back("Action", m_req.actionId);
-    if (!m_req.vendor.empty())
-        fields.emplace_back("Vendor", m_req.vendor);
-    if (!m_req.vendorUrl.empty())
-        fields.emplace_back("URL", m_req.vendorUrl);
-    for (const auto& [k, v] : m_req.details)
-        fields.emplace_back(k, v);
-
-    if (cfg.showDetails && !fields.empty()) {
+    if (m_detailsContainer) {
         auto detailsWrap = CRowLayoutBuilder::begin()->commence();
         detailsWrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
         detailsWrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
@@ -405,35 +447,7 @@ void CDialog::build() {
         detailsWrap->addChild(m_detailsButton);
         outer->addChild(detailsWrap);
 
-        auto detailsBoxWrap = CRowLayoutBuilder::begin()->commence();
-        detailsBoxWrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
-        detailsBoxWrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
-
-        auto detailsBox = CRectangleBuilder::begin()
-                              ->color([] { return g_pAgent->backend()->getPalette()->m_colors.alternateBase; })
-                              ->rounding(g_pAgent->backend()->getPalette()->m_vars.bigRounding)
-                              ->size(CDynamicSize{CDynamicSize::HT_SIZE_AUTO, CDynamicSize::HT_SIZE_AUTO, {}})
-                              ->commence();
-
-        auto detailsCol = CColumnLayoutBuilder::begin()->gap(4)->commence();
-        detailsCol->setMargin(12);
-
-        for (const auto& [key, val] : fields) {
-            auto rowWrap = CRowLayoutBuilder::begin()->commence();
-            rowWrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
-            rowWrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
-            rowWrap->addChild(CTextBuilder::begin()
-                                  ->text(key + ": " + val)
-                                  ->fontSize({CFontSize::HT_FONT_SMALL})
-                                  ->color([] { return g_pAgent->backend()->getPalette()->m_colors.text.darken(0.3); })
-                                  ->commence());
-            detailsCol->addChild(rowWrap);
-        }
-
-        detailsBox->addChild(detailsCol);
-        detailsBoxWrap->addChild(detailsBox);
-        m_detailsContainer = detailsBoxWrap;
-        m_detailsParent    = outer;
+        m_detailsParent = outer;
     }
 
     if (m_passwordField)
