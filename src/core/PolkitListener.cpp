@@ -75,13 +75,10 @@ CPolkitListener::~CPolkitListener() {
         if (m_watchedEventFd >= 0 && m_watchedEventFd != m_watchedFd)
             m_backend->removeFd(m_watchedEventFd);
     }
-    if (m_conn && m_agentObject) {
-        try {
-            auto                                                              proxy = sdbus::createProxy(*m_conn, sdbus::ServiceName{POLKIT_BUS}, sdbus::ObjectPath{POLKIT_OBJ});
-            sdbus::Struct<std::string, std::map<std::string, sdbus::Variant>> subject{"unix-session", {{"session-id", sdbus::Variant{m_sessionId}}}};
-            proxy->callMethod("UnregisterAuthenticationAgent").onInterface(POLKIT_AUTHORITY).withArguments(subject, m_objectPath);
-        } catch (...) {}
-    }
+    // no explicit UnregisterAuthenticationAgent here: this destructor runs during static
+    // teardown at exit, and the D-Bus call then segfaulted inside sdbus-c++ as the library
+    // was finalized. polkitd drops the agent when our bus name vanishes, so unregistering
+    // by hand was redundant anyway.
 }
 
 bool CPolkitListener::registerAgent(Hyprutils::Memory::CSharedPointer<Hyprtoolkit::IBackend> backend) {
