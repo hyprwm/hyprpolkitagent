@@ -31,6 +31,7 @@ class CDialog {
     void                                                            buildPasswordField();
     void                                                            showStatus(Hyprutils::Memory::CSharedPointer<Hyprtoolkit::IElement>& wrap, bool& shown, bool show);
     void                                                            showPasswordField(bool show);
+    bool                                                            canSubmit() const;
 
     Hyprutils::Memory::CSharedPointer<Hyprtoolkit::IBackend>        m_backend;
     Hyprutils::Memory::CSharedPointer<Hyprtoolkit::IWindow>         m_window;

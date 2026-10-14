@@ -8,6 +8,7 @@ struct SHPAConfig {
     int  windowWidth        = 520;
     int  windowHeight       = 440;
     bool showDetails        = true;
+    bool allowEmptyPassword = false;
 };
 
 class CConfigManager {

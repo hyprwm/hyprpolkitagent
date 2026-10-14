@@ -21,12 +21,14 @@ general {
     window_width         = 520
     window_height        = 440
     show_details         = true
+    allow_empty_password = false
 }
 ```
 
 - `password_field_width`: px, width of the password input
 - `window_width`, `window_height`: px, dialog size
 - `show_details`: whether the action and command panel can be toggled
+- `allow_empty_password`: whether an empty password can be submitted. Useful when PAM falls through to another method (e.g. face recognition with howdy) after the password module fails
 
 Drop the file at the path above with only the keys you want to override. Changes apply the next time the agent starts.
 
