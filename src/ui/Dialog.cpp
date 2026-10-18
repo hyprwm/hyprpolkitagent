@@ -249,6 +249,10 @@ void CDialog::build() {
                    ->maxSize({winMax, targetHeight})
                    ->appTitle("Authentication Required")
                    ->appClass("hyprpolkitagent")
+                   // inhibit compositor keybinds while the prompt is focused so a focus-cycle
+                   // bind can't move keyboard off the dialog mid-password. no-ops where the
+                   // compositor doesn't advertise the manager.
+                   ->inhibitShortcuts(true)
                    ->commence();
 
     m_authEnabled = canSubmit();
