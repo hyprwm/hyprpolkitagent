@@ -230,10 +230,23 @@ void CDialog::build() {
     }
     const double targetHeight = (double)cfg.windowHeight + extraForDetails;
 
+    // the toolkit opens a floating window at its minSize, so preferredSize alone was
+    // ignored and the hard-coded 460 min pinned every dialog to 460 wide regardless of
+    // window_width. pin the min to the configured width instead. never go narrower than
+    // the password field needs, or it overflows the content column and renders invisible;
+    // the column is 0.88 of the window minus the two 20px margins.
+    double       winWidth   = (double)cfg.windowWidth;
+    const double fieldFloor = ((double)cfg.passwordFieldWidth + 64.0) / 0.88; // 40 margins + 24 slack
+    if (winWidth < fieldFloor)
+        winWidth = fieldFloor;
+    if (winWidth < 460.0)
+        winWidth = 460.0;
+    const double winMax = winWidth > 600.0 ? winWidth : 600.0;
+
     m_window = CWindowBuilder::begin()
-                   ->preferredSize({(double)cfg.windowWidth, targetHeight})
-                   ->minSize({460.0, targetHeight})
-                   ->maxSize({600.0, targetHeight})
+                   ->preferredSize({winWidth, targetHeight})
+                   ->minSize({winWidth, targetHeight})
+                   ->maxSize({winMax, targetHeight})
                    ->appTitle("Authentication Required")
                    ->appClass("hyprpolkitagent")
                    ->commence();
