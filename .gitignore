@@ -40,7 +40,8 @@ compile_commands.json
 
 # Build output
 build/
-
+# Ignore nix build output
+result/
 # CMake generated (in-source build artifacts)
 CMakeFiles/
 CMakeCache.txt

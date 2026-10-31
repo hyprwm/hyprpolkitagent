@@ -1,5 +1,7 @@
 #pragma once
 
+#include <filesystem>
+#include <optional>
 #include <string>
 
 struct SHPAConfig {
@@ -13,7 +15,7 @@ struct SHPAConfig {
 
 class CConfigManager {
   public:
-    CConfigManager();
+    CConfigManager(std::optional<std::string> customPath = "");
 
     void              load();
 
@@ -22,8 +24,9 @@ class CConfigManager {
     }
 
   private:
-    SHPAConfig  m_cfg;
-    std::string m_path;
+    SHPAConfig            m_cfg;
+    std::filesystem::path m_path;
+    bool                  m_explicit = false;
 };
 
 inline CConfigManager* g_pConfigManager = nullptr;

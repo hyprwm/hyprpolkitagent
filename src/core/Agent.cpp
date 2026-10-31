@@ -10,8 +10,8 @@ using namespace Hyprtoolkit;
 CAgent::CAgent()  = default;
 CAgent::~CAgent() = default;
 
-bool CAgent::start() {
-    static CConfigManager s_configManager;
+bool CAgent::start(const std::optional<std::string>& configPath) {
+    static CConfigManager s_configManager{configPath};
     g_pConfigManager = &s_configManager;
     g_pConfigManager->load();
 

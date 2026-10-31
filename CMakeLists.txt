@@ -28,6 +28,8 @@ add_executable(hyprpolkitagent
     src/core/Agent.hpp
     src/core/PolkitListener.cpp
     src/core/PolkitListener.hpp
+    src/core/ArgumentParser.cpp
+    src/core/ArgumentParser.hpp
     src/ui/Dialog.cpp
     src/ui/Dialog.hpp
 )

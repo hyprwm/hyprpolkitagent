@@ -1,20 +1,35 @@
 #include "Config.hpp"
 
 #include <hyprlang.hpp>
+#include <filesystem>
 #include <cstdlib>
+#include <optional>
 #include <print>
 
-static std::string configPath() {
-    const char* xdg  = getenv("XDG_CONFIG_HOME");
-    std::string base = xdg ? xdg : (std::string{getenv("HOME")} + "/.config");
-    return base + "/hyprpolkitagent/hyprpolkitagent.conf";
+static std::optional<std::filesystem::path> configPath() {
+    constexpr auto REL = "hyprpolkitagent/hyprpolkitagent.conf";
+    if (const char* xdg = std::getenv("XDG_CONFIG_HOME"); xdg && *xdg)
+        return std::filesystem::path{xdg} / REL;
+    if (const char* home = std::getenv("HOME"); home && *home)
+        return std::filesystem::path{home} / ".config" / REL;
+    return std::nullopt;
 }
 
-CConfigManager::CConfigManager() : m_path(configPath()) {}
+CConfigManager::CConfigManager(std::optional<std::string> customPath) {
+    if (customPath) {
+        m_explicit = true;
+        m_path     = std::filesystem::absolute(*customPath);
+    } else if (auto d = configPath())
+        m_path = *d;
+};
 
 void CConfigManager::load() {
+    std::error_code ec;
+    if (m_explicit && !std::filesystem::is_regular_file(m_path, ec))
+        std::print(stderr, "hyprpolkitagent: config file not found: {}\n", m_path.string());
+
     Hyprlang::SConfigOptions opts;
-    opts.allowMissingConfig = true;
+    opts.allowMissingConfig = !m_explicit;
     Hyprlang::CConfig cfg{m_path.c_str(), opts};
 
     cfg.addConfigValue("general:password_field_width", Hyprlang::INT{340});

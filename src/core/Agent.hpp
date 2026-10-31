@@ -17,7 +17,7 @@ class CAgent {
     CAgent();
     ~CAgent();
 
-    bool                                                     start();
+    bool                                                     start(const std::optional<std::string>& configPath);
     void                                                     beginAuth(CPolkitListener::SAuthRequest req);
     void                                                     endAuth();
     void                                                     onRequest(const std::string& prompt, bool echo);
