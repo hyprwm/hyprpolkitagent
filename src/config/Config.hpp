@@ -17,7 +17,7 @@ class CConfigManager {
   public:
     CConfigManager(std::optional<std::string> customPath = "");
 
-    void              load();
+    bool              load();
 
     const SHPAConfig& get() const {
         return m_cfg;

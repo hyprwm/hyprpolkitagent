@@ -13,7 +13,8 @@ CAgent::~CAgent() = default;
 bool CAgent::start(const std::optional<std::string>& configPath) {
     static CConfigManager s_configManager{configPath};
     g_pConfigManager = &s_configManager;
-    g_pConfigManager->load();
+    if (!g_pConfigManager->load())
+        return false;
 
     m_backend = IBackend::create();
     if (!m_backend) {
