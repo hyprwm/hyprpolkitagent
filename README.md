@@ -5,7 +5,7 @@ A simple polkit authentication agent for Hyprland, written in C++ with [hyprtool
 
 ## Usage
 
-See [the hyprland wiki](https://wiki.hypr.land/Hypr-Ecosystem/hyprpolkitagent/).
+See [the hyprland wiki](https://wiki.hypr.land/hypr-ecosystem/user/hyprpolkitagent/).
 
 ## Configuration
 
@@ -36,4 +36,4 @@ Drop the file at the path above with only the keys you want to override. Changes
 
 Colors, corner rounding, font family and font sizes come from the hyprtoolkit palette, not from the agent's own config. Drop a `~/.config/hypr/hyprtoolkit.conf` (or `$XDG_CONFIG_HOME/hypr/hyprtoolkit.conf`) with the keys you want to override. The next dialog the agent shows uses the new values, no restart needed.
 
-See [the hyprtoolkit wiki](https://wiki.hyprland.org/Hypr-Ecosystem/hyprtoolkit/) for the full list of available keys.
+See [the hyprtoolkit wiki](https://wiki.hypr.land/hypr-ecosystem/user/hyprtoolkit/) for the full list of available keys.
