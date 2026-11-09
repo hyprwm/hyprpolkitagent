@@ -79,6 +79,7 @@ class CPolkitListener {
     void        rejectActive(const std::string& msg);
 
     void        pumpBus();
+    bool        registerWithAuthority();
     bool        isSessionLocked();
     std::string getOwnSessionId();
     std::string identityToString(const sdbus::Struct<std::string, std::map<std::string, sdbus::Variant>>& id) const;
@@ -87,6 +88,9 @@ class CPolkitListener {
 
     std::unique_ptr<sdbus::IConnection>                      m_conn;
     std::unique_ptr<sdbus::IObject>                          m_agentObject;
+    // watches org.freedesktop.DBus for PolicyKit1 changing owner, i.e. polkitd restarting.
+    // declared after m_conn so it is destroyed first (the signal match lives on that connection).
+    std::unique_ptr<sdbus::IProxy>                           m_dbusProxy;
     std::string                                              m_objectPath = "/org/hyprland/PolicyKit1/AuthenticationAgent";
     std::string                                              m_sessionId;
 

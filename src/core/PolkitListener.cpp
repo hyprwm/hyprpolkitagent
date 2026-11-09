@@ -119,15 +119,21 @@ bool CPolkitListener::registerAgent(Hyprutils::Memory::CSharedPointer<Hyprtoolki
         return false;
     }
 
+    // polkitd restarting drops our registration and never tells us, so later auths get no dialog.
+    // watch for PolicyKit1 getting a new owner and register again. the watch goes up before the
+    // first register so a restart in that gap is still caught.
     try {
-        auto                                                              proxy = sdbus::createProxy(*m_conn, sdbus::ServiceName{POLKIT_BUS}, sdbus::ObjectPath{POLKIT_OBJ});
-        sdbus::Struct<std::string, std::map<std::string, sdbus::Variant>> subject{"unix-session", {{"session-id", sdbus::Variant{m_sessionId}}}};
-        const char*                                                       locale = getenv("LANG");
-        proxy->callMethod("RegisterAuthenticationAgent").onInterface(POLKIT_AUTHORITY).withArguments(subject, std::string{locale ? locale : ""}, m_objectPath);
-    } catch (const sdbus::Error& e) {
-        std::print(stderr, "failed to register agent: {}\n", e.what());
+        m_dbusProxy = sdbus::createProxy(*m_conn, sdbus::ServiceName{"org.freedesktop.DBus"}, sdbus::ObjectPath{"/org/freedesktop/DBus"});
+        m_dbusProxy->uponSignal("NameOwnerChanged").onInterface("org.freedesktop.DBus").call([this](std::string name, std::string oldOwner, std::string newOwner) {
+            if (name != POLKIT_BUS || newOwner.empty())
+                return;
+            if (registerWithAuthority())
+                std::print(stderr, "re-registered polkit agent after polkitd restart\n");
+        });
+    } catch (const sdbus::Error& e) { std::print(stderr, "failed to watch for polkitd restart ({}); will not recover if polkitd restarts\n", e.what()); }
+
+    if (!registerWithAuthority())
         return false;
-    }
 
     const auto poll  = m_conn->getEventLoopPollData();
     m_watchedFd      = poll.fd;
@@ -143,6 +149,24 @@ bool CPolkitListener::registerAgent(Hyprutils::Memory::CSharedPointer<Hyprtoolki
                helper ? helper : "none", helperIsSetuid(helper) ? "yes" : "no");
     if (!socketReachable() && (!helper || !helperIsSetuid(helper)))
         std::print(stderr, "warning: no working helper detected; auth requests will fail. install polkit or enable polkit-agent-helper.socket\n");
+    return true;
+}
+
+bool CPolkitListener::registerWithAuthority() {
+    try {
+        auto                                                              proxy = sdbus::createProxy(*m_conn, sdbus::ServiceName{POLKIT_BUS}, sdbus::ObjectPath{POLKIT_OBJ});
+        sdbus::Struct<std::string, std::map<std::string, sdbus::Variant>> subject{"unix-session", {{"session-id", sdbus::Variant{m_sessionId}}}};
+        const char*                                                       locale = getenv("LANG");
+        proxy->callMethod("RegisterAuthenticationAgent").onInterface(POLKIT_AUTHORITY).withArguments(subject, std::string{locale ? locale : ""}, m_objectPath);
+    } catch (const sdbus::Error& e) {
+        // our first register can D-Bus-activate polkitd, and the NameOwnerChanged that follows
+        // makes us register again; polkitd rejects the second as already-registered, which means
+        // we are registered, not that anything failed.
+        if (e.getMessage().find("already exists") != std::string::npos)
+            return true;
+        std::print(stderr, "failed to register agent: {}\n", e.what());
+        return false;
+    }
     return true;
 }
 
