@@ -3,19 +3,12 @@
   stdenv,
   cmake,
   pkg-config,
-  hyprutils,
-  hyprtoolkit,
-  hyprgraphics,
   hyprlang,
-  aquamarine,
-  pixman,
-  libdrm,
-  sdbus-cpp_2,
-  polkit,
-  systemd,
-  cairo,
-  pango,
+  hyprtoolkit,
   libxkbcommon,
+  polkit,
+  sdbus-cpp_2,
+  systemd,
   version ? "0",
 }:
 let
@@ -42,19 +35,12 @@ stdenv.mkDerivation {
   ];
 
   buildInputs = [
-    hyprutils
-    hyprtoolkit
-    hyprgraphics
     hyprlang
-    aquamarine
-    pixman
-    libdrm
-    sdbus-cpp_2
-    polkit
-    systemd
-    cairo
-    pango
+    hyprtoolkit
     libxkbcommon
+    polkit
+    sdbus-cpp_2
+    systemd
   ];
 
   meta = {
