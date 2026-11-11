@@ -58,11 +58,14 @@ void CDialog::setPrompt(const std::string& text, bool echo) {
 
     // a real password prompt: pam wants typed input now, so reveal the field and button
     // if a preceding cue had hidden them. no-op when already visible (password-only auth).
-    m_sawPasswordPrompt = true;
+    const bool firstPrompt = !m_sawPasswordPrompt;
+    m_sawPasswordPrompt    = true;
     showPasswordField(true);
 
-    // initial prompt arrives after build() and would clobber the first keystroke
-    const bool clean = m_currentPassword.empty() && newPrompt == m_promptText && echo == m_promptEcho;
+    // pam's first prompt can arrive after the user typed ahead (socket helper latency), so keep
+    // the text on the first prompt when echo matches. a re-ask (FAILURE, identity switch) clears.
+    const bool samePrompt = newPrompt == m_promptText && echo == m_promptEcho;
+    const bool clean      = m_currentPassword.empty() ? samePrompt : (firstPrompt && echo == m_promptEcho);
 
     m_promptText = newPrompt;
     m_promptEcho = echo;
