@@ -231,7 +231,43 @@ void CDialog::build() {
 
         extraForDetails = detailsSize.y + OUTER_GAP;
     }
-    const double targetHeight = (double)cfg.windowHeight + extraForDetails;
+    // the window height is fixed before the message and command are built, so a wrapped line would
+    // spill past it. measure the extra height each needs once wrapped and reserve it now, the same
+    // way the details box above does.
+    double extraForText = 0.0;
+    {
+        const auto palette      = g_pAgent->backend()->getPalette();
+        auto       wrapOverflow = [](const std::string& s, CFontSize::eSizingBase base, double width, const std::string& family) -> double {
+            if (s.empty())
+                return 0.0;
+            // a detached element lays out to nothing, so hang it off a positioned root before
+            // forceReposition, the same shape the details box above measures.
+            auto measure = [&](bool wrap) {
+                auto b = CTextBuilder::begin()->text(std::string{s})->fontSize({base})->noEllipsize(true)->color([] { return g_pAgent->backend()->getPalette()->m_colors.text; });
+                if (!family.empty())
+                    b = b->fontFamily(std::string{family});
+                if (wrap)
+                    b = b->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_AUTO, {width, 0.0}});
+                auto col = CColumnLayoutBuilder::begin()->commence();
+                col->addChild(b->commence());
+                auto box = CRectangleBuilder::begin()->size(CDynamicSize{CDynamicSize::HT_SIZE_AUTO, CDynamicSize::HT_SIZE_AUTO, {}})->commence();
+                box->addChild(col);
+                auto root = CRowLayoutBuilder::begin()->commence();
+                root->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
+                root->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
+                root->addChild(box);
+                box->forceReposition();
+                return box->size().y;
+            };
+            const double extra = measure(true) - measure(false);
+            return extra > 0.0 ? extra : 0.0;
+        };
+
+        const std::string msg = m_req.command.empty() ? m_req.message : std::string{"Allow this action?"};
+        extraForText += wrapOverflow(msg, CFontSize::HT_FONT_H3, (double)cfg.passwordFieldWidth, "");
+        extraForText += wrapOverflow(m_req.command, CFontSize::HT_FONT_TEXT, (double)cfg.passwordFieldWidth, std::string{palette->m_vars.fontFamilyMonospace});
+    }
+    const double targetHeight = (double)cfg.windowHeight + extraForDetails + extraForText;
 
     // the toolkit opens a floating window at its minSize, so preferredSize alone was
     // ignored and the hard-coded 460 min pinned every dialog to 460 wide regardless of
@@ -343,17 +379,15 @@ void CDialog::build() {
         if (!m_req.command.empty())
             msg = "Allow this action?";
 
-        constexpr size_t MAX_MSG = 120;
-        if (msg.size() > MAX_MSG)
-            msg = msg.substr(0, MAX_MSG - 3) + "...";
-
         auto wrap = CRowLayoutBuilder::begin()->commence();
         wrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
         wrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
+        // wrap instead of ellipsizing so a long message stays readable; the window was grown for it
         wrap->addChild(CTextBuilder::begin()
                            ->text(std::string{msg})
                            ->fontSize({CFontSize::HT_FONT_H3})
-                           ->clampSize({(double)cfg.passwordFieldWidth, -1.0})
+                           ->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_AUTO, {(double)cfg.passwordFieldWidth, 0.0}})
+                           ->noEllipsize(true)
                            ->color([] { return g_pAgent->backend()->getPalette()->m_colors.text; })
                            ->commence());
         outer->addChild(wrap);
@@ -364,12 +398,8 @@ void CDialog::build() {
         wrap->setPositionMode(IElement::HT_POSITION_ABSOLUTE);
         wrap->setPositionFlag(IElement::HT_POSITION_FLAG_HCENTER, true);
 
-        std::string      cmd     = m_req.command;
-        constexpr size_t MAX_CMD = 55;
-        if (cmd.size() > MAX_CMD)
-            cmd = cmd.substr(0, MAX_CMD - 3) + "...";
-
-        const auto palette = g_pAgent->backend()->getPalette();
+        const std::string cmd     = m_req.command;
+        const auto        palette = g_pAgent->backend()->getPalette();
         auto       box     = CRectangleBuilder::begin()
                        ->color([] { return g_pAgent->backend()->getPalette()->m_colors.alternateBase; })
                        ->rounding(palette->m_vars.bigRounding)
@@ -386,7 +416,8 @@ void CDialog::build() {
         inner->addChild(CTextBuilder::begin()
                             ->text(std::string{cmd})
                             ->fontFamily(std::string{palette->m_vars.fontFamilyMonospace})
-                            ->clampSize({(double)cfg.passwordFieldWidth, -1.0})
+                            ->size({CDynamicSize::HT_SIZE_ABSOLUTE, CDynamicSize::HT_SIZE_AUTO, {(double)cfg.passwordFieldWidth, 0.0}})
+                            ->noEllipsize(true)
                             ->color([] { return g_pAgent->backend()->getPalette()->m_colors.text; })
                             ->commence());
         box->addChild(inner);
