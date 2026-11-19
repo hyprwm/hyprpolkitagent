@@ -1,6 +1,7 @@
 #include "PolkitListener.hpp"
 
 #include "Agent.hpp"
+#include "../config/Config.hpp"
 
 #include <cerrno>
 #include <cstdlib>
@@ -481,7 +482,8 @@ void CPolkitListener::onHelperReadable() {
         handleLine(*cur, line);
     }
 
-    if (eof && m_current.get() == cur) {
+    // a held SUCCESS is done with the helper, its eof is not a failure
+    if (eof && m_current.get() == cur && !cur->awaitingConfirm) {
         const bool wasSocket = (cur->helper.mode == HELPER_SOCKET);
         const bool hadPrompt = cur->helper.gotPrompt;
         if (cur->helper.pid > 0) {
@@ -539,6 +541,13 @@ void CPolkitListener::handleLine(SActiveAuth& a, const std::string& line) {
             waitpid(a.helper.pid, &status, 0);
             a.helper.pid = -1;
         }
+        // nothing was typed (face, fingerprint): hold the reply until the user confirms
+        if (g_pConfigManager->get().requireConfirmation && !a.answered) {
+            killHelper(a.helper);
+            a.awaitingConfirm = true;
+            g_pAgent->askConfirm();
+            return;
+        }
         completeAuth(true, false);
         return;
     }
@@ -568,6 +577,7 @@ void CPolkitListener::handleLine(SActiveAuth& a, const std::string& line) {
 void CPolkitListener::submitResponse(const std::string& password) {
     if (!m_current || m_current->helper.stdinFd < 0)
         return;
+    m_current->answered    = true;
     const std::string line = password + "\n";
     (void)write(m_current->helper.stdinFd, line.data(), line.size());
 }
@@ -575,7 +585,18 @@ void CPolkitListener::submitResponse(const std::string& password) {
 void CPolkitListener::cancelCurrent() {
     if (!m_current)
         return;
+    // pam already passed here, so only an error reply stops polkitd from granting
+    if (m_current->awaitingConfirm && m_current->reply) {
+        m_current->reply->returnError(sdbus::Error{sdbus::Error::Name{"org.freedesktop.PolicyKit1.Error.Cancelled"}, "Cancelled"});
+        m_current->reply.reset();
+    }
     completeAuth(false, true);
+}
+
+void CPolkitListener::confirmCurrent() {
+    if (!m_current || !m_current->awaitingConfirm)
+        return;
+    completeAuth(true, false);
 }
 
 void CPolkitListener::selectIdentity(const std::string& identityString) {

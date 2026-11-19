@@ -25,6 +25,8 @@ class CAgent {
     void                                                     onError(const std::string& text);
     void                                                     submitPassword(const std::string& password);
     void                                                     cancel();
+    void                                                     askConfirm();
+    void                                                     confirm();
     void                                                     selectIdentity(const std::string& identityString);
 
     Hyprutils::Memory::CSharedPointer<Hyprtoolkit::IBackend> backend() {
