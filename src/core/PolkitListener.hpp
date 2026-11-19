@@ -38,6 +38,7 @@ class CPolkitListener {
 
     void submitResponse(const std::string& password);
     void cancelCurrent();
+    void confirmCurrent();
     void selectIdentity(const std::string& identityString);
 
   private:
@@ -62,6 +63,8 @@ class CPolkitListener {
         std::unique_ptr<sdbus::Result<>> reply;
         int                              selectedIdx = 0;
         SHelperProc                      helper;
+        bool                             answered        = false; // the user submitted something to pam
+        bool                             awaitingConfirm = false;
     };
 
     void        onBeginAuthentication(sdbus::Result<>&& result, std::string actionId, std::string message, std::string iconName, std::map<std::string, std::string> details,
