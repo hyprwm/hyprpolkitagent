@@ -158,6 +158,17 @@ void CDialog::setInfo(const std::string& text) {
     showStatus(m_infoWrap, m_infoShown, !text.empty());
 }
 
+void CDialog::askConfirm() {
+    // pam is done, nothing left to type. keep only the button that confirms.
+    showPasswordField(false);
+    m_confirming = true;
+    if (m_btnRow && m_authButton) {
+        m_btnRow->addChild(m_authButton);
+        m_authButton->setEnabled(true);
+    }
+    setInfo("Authenticated. Confirm to allow this action.");
+}
+
 void CDialog::setError(const std::string& text) {
     if (m_errorLabel)
         m_errorLabel->setText(std::string{text});
@@ -310,7 +321,9 @@ void CDialog::build() {
         if (!ev.down || ev.repeat)
             return;
         if (ev.xkbKeysym == XKB_KEY_Return || ev.xkbKeysym == XKB_KEY_KP_Enter) {
-            if (canSubmit())
+            if (m_confirming)
+                g_pAgent->confirm();
+            else if (canSubmit())
                 g_pAgent->submitPassword(m_currentPassword);
         } else if (ev.xkbKeysym == XKB_KEY_Escape) {
             g_pAgent->cancel();
@@ -475,7 +488,9 @@ void CDialog::build() {
                            ->label(std::string{"Authenticate"})
                            ->enabled(m_authEnabled)
                            ->onMainClick([this](CSharedPointer<CButtonElement>) {
-                               if (canSubmit())
+                               if (m_confirming)
+                                   g_pAgent->confirm();
+                               else if (canSubmit())
                                    g_pAgent->submitPassword(m_currentPassword);
                            })
                            ->commence();

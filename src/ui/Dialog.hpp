@@ -25,6 +25,7 @@ class CDialog {
     void setPrompt(const std::string& text, bool echo);
     void setInfo(const std::string& text);
     void setError(const std::string& text);
+    void askConfirm();
 
   private:
     void                                                            build();
@@ -65,5 +66,6 @@ class CDialog {
     bool                                                            m_infoShown      = false;
     bool                                                            m_sawPasswordPrompt = false;
     bool                                                            m_passwordVisible   = true;
+    bool                                                            m_confirming        = false;
     std::string                                                     m_promptText     = "Password";
 };

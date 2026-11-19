@@ -64,6 +64,15 @@ void CAgent::cancel() {
     m_listener.cancelCurrent();
 }
 
+void CAgent::askConfirm() {
+    if (m_dialog)
+        m_dialog->askConfirm();
+}
+
+void CAgent::confirm() {
+    m_listener.confirmCurrent();
+}
+
 void CAgent::selectIdentity(const std::string& s) {
     m_listener.selectIdentity(s);
 }
